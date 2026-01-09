@@ -33,5 +33,17 @@ export const listUserRooms = async (req:Request, res:Response) => {
     res.status(200).json({
         success:true,
         rooms,
-    })
-}
+    });
+};
+
+// export const getRoomMessages = async (req: Request, res: Response) => {
+//   const { roomId } = req.params;
+//   const userId = req.user!.userId;
+
+//   const messages = await getRoomMessagesService(roomId, userId);
+
+//   res.status(200).json({
+//     success: true,
+//     messages,
+//   });
+// };
