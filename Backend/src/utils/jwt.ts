@@ -5,12 +5,24 @@ export interface JwtPayload {
   userId: string;
 }
 
-export const signToken = (payload: JwtPayload): string => {
-  return jwt.sign(payload, env.JWT_SECRET, {
-    expiresIn: "1d",
+// access token
+export const signAccessToken = (payload: JwtPayload): string => {
+  return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
+    expiresIn: "15m",
   });
 };
 
-export const verifyToken = (token: string): JwtPayload => {
-  return jwt.verify(token, env.JWT_SECRET) as JwtPayload;
+export const verifyAccessToken = (token: string): JwtPayload => {
+  return jwt.verify(token, env.JWT_ACCESS_SECRET) as JwtPayload;
+};
+
+// refresh token
+export const signRefreshToken = (payload: JwtPayload): string => {
+  return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
+    expiresIn: "7d",
+  });
+};
+
+export const verifyRefreshToken = (token: string): JwtPayload => {
+  return jwt.verify(token, env.JWT_REFRESH_SECRET) as JwtPayload;
 };
