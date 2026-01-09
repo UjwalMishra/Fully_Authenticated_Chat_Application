@@ -1,11 +1,9 @@
-import express from "express";
+import { app } from "./app";
+import { connectDB } from "./config/db";
+import { env } from "./config/env";
 
-const app = express();
+connectDB();
 
-app.get("/", (req, res) => {
-  res.send("TS + Express works!");
-});
-
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+app.listen(env.PORT, () => {
+  console.log(`Server running on port ${env.PORT}`);
 });
