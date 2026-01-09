@@ -1,9 +1,38 @@
 import { mailTransporter } from "../../config/mail";
 import { User } from "../../models/user.model"
 import { comparePassword, hashPassword } from "../../utils/hash";
-import { signToken } from "../../utils/jwt";
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../../utils/jwt";
 import crypto from "crypto";
 
+
+
+export const refreshTokenService = async (token: string) => {
+  const decoded = verifyRefreshToken(token) as { userId: string };
+
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    _id: decoded.userId,
+    refreshToken: hashedToken,
+  });
+
+  if (!user) throw new Error("Invalid refresh token");
+
+  const newAccessToken = signAccessToken({ userId: user.id });
+  const newRefreshToken = signRefreshToken({ userId: user.id });
+
+  user.refreshToken = crypto
+    .createHash("sha256")
+    .update(newRefreshToken)
+    .digest("hex");
+
+  await user.save();
+
+  return { newAccessToken, newRefreshToken };
+};
 
 
 export const signupService = async (
@@ -25,8 +54,18 @@ export const signupService = async (
         password:hashedPassword
     })
 
-    const token = signToken({userId: user.id});
-    return {user,token};
+    const accessToken = signAccessToken({ userId: user.id });
+    const refreshToken = signRefreshToken({ userId: user.id });
+
+    const hashedRefreshToken = crypto
+    .createHash("sha256")
+    .update(refreshToken)
+    .digest("hex");
+
+    user.refreshToken = hashedRefreshToken;
+    await user.save();
+
+    return { user, accessToken, refreshToken };
 }
 
 
@@ -46,11 +85,18 @@ export const loginService = async(
         throw new Error("Invalid password!");
     }
 
-    const token = signToken({userId:user.id});
+    const accessToken = signAccessToken({ userId: user.id });
+    const refreshToken = signRefreshToken({ userId: user.id });
 
-    return {
-        user,token
-    };
+   const hashedRefreshToken = crypto
+    .createHash("sha256")
+    .update(refreshToken)
+    .digest("hex");
+
+    user.refreshToken = hashedRefreshToken;
+    await user.save();
+
+    return { user, accessToken, refreshToken };
 };
 
 export const forgotPasswordService = async(email:string) => {

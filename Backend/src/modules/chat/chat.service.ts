@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { Room } from "../../models/room.model";
+import { Message } from "../../models/message.model";
 
 export const createRoomService = async (
   name: string,
@@ -45,3 +46,26 @@ export const listUserRoomsService = async (userId: string) => {
     members: new Types.ObjectId(userId),
   }).select("_id name members createdAt");
 };
+
+// export const getRoomMessagesService = async (
+//   roomId: string,
+//   userId: string
+// ) => {
+//   if (!Types.ObjectId.isValid(roomId)) {
+//     throw new Error("Invalid room id");
+//   }
+
+//   // Ensure user belongs to room
+//   const room = await Room.findOne({
+//     _id: roomId,
+//     members: new Types.ObjectId(userId),
+//   });
+
+//   if (!room) {
+//     throw new Error("Access denied");
+//   }
+
+//   return Message.find({ room: room._id })
+//     .sort({ createdAt: 1 })
+//     .select("_id content sender createdAt");
+// };
